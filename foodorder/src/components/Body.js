@@ -4,58 +4,55 @@ import Shimmer from "./Shimmer.js";
 
 const Body = () => {
   const [listOfRestaurants, setListOfRestaurants] = useState([]);
-
-  const[filteredRestaurant,setfilterdRestaurant]=useState([]);
-
-  const[SearchText,setSearchText]=useState("");
+  const [filteredRestaurant, setFilteredRestaurant] = useState([]);
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
-    
+    try {
       const data = await fetch(
         "https://www.swiggy.com/mapi/restaurants/list/v5?offset=0&is-seo-homepage-enabled=true&lat=25.3176452&lng=82.9739144&carousel=true&third_party_vendor=1"
       );
       const json = await data.json();
 
       console.log(json);
-      //optional chaining
-      setListOfRestaurants(json?.data?.cards?.[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants);
-      setfilterdRestaurant(json?.data?.cards?.[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants);
-      // conditional rendering
-      // if(listOfRestaurants.length===0)
-      // {
-      //   return <Shimmer/>;
-      // }
-    
+      const restaurants =
+        json?.data?.cards?.[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants;
+
+      setListOfRestaurants(restaurants);
+      setFilteredRestaurant(restaurants);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
 
- 
+  const handleSearch = () => {
+    const filtered =
+      searchText.trim() === ""
+        ? listOfRestaurants
+        : listOfRestaurants.filter((res) =>
+            res?.info?.name.toLowerCase().includes(searchText.toLowerCase())
+          );
 
-  return  listOfRestaurants.length===0?<Shimmer/>:(
+    setFilteredRestaurant(filtered);
+  };
+
+  return listOfRestaurants.length === 0 ? (
+    <Shimmer />
+  ) : (
     <div className="body">
       <div className="filter">
         <div className="search">
-           <input type="text" className="search-box" value={SearchText}  onChange={(e)=>{
-             setSearchText(e.target.value);
-           }}/>
-           <button onClick={()=>{
-            let filtered=listOfRestaurants;
-              if(SearchText=="")
-              {
-                setfilterdRestaurant(listOfRestaurants);
-              }
-              else
-              {
-                filtered=listOfRestaurants.filter((res)=>res?.info?.name.toLowerCase().includes(SearchText.toLowerCase()));
-              };
-              setfilterdRestaurant(filtered);
-
-
-           }}>Search</button>
-
+          <input
+            type="text"
+            className="search-box"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+          <button onClick={handleSearch}>Search</button>
         </div>
         <button
           className="filter-btn"
@@ -63,8 +60,7 @@ const Body = () => {
             const filteredList = listOfRestaurants.filter(
               (res) => res?.info?.avgRating > 4
             );
-            setfilterdRestaurant(filteredList);
-            console.log(filteredList);
+            setFilteredRestaurant(filteredList);
           }}
         >
           Top Rated Restaurants
