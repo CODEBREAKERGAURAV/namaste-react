@@ -1,45 +1,39 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import RestaurantCard from "./Restaurantcard";
 import Shimmer from "./Shimmer.js";
+import mockData from "../utils/mockData.js";
 
 const Body = () => {
-  const [listOfRestaurants, setListOfRestaurants] = useState([]);
-  const [filteredRestaurant, setFilteredRestaurant] = useState([]);
+  const [listOfRestaurants, setListOfRestaurants] = useState(mockData);
+  const [filteredRestaurants, setFilteredRestaurants] = useState(mockData);
   const [searchText, setSearchText] = useState("");
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const data = await fetch(
-        "https://www.swiggy.com/mapi/restaurants/list/v5?offset=0&is-seo-homepage-enabled=true&lat=25.3176452&lng=82.9739144&carousel=true&third_party_vendor=1"
-      );
-      const json = await data.json();
-
-      console.log(json);
-      const restaurants =
-        json?.data?.cards?.[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants;
-
-      setListOfRestaurants(restaurants);
-      setFilteredRestaurant(restaurants);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
 
   const handleSearch = () => {
     const filtered =
       searchText.trim() === ""
-        ? listOfRestaurants
+        ? listOfRestaurants 
         : listOfRestaurants.filter((res) =>
             res?.info?.name.toLowerCase().includes(searchText.toLowerCase())
           );
 
-    setFilteredRestaurant(filtered);
+    setFilteredRestaurants(filtered || []);
   };
 
+  const [isTopRated, setIsTopRated] = useState(false);
+
+
+  const filterTopRated = () => {
+    if (!isTopRated) {
+      const filteredList = listOfRestaurants.filter(
+        (res) => res.info.avgRating > 4
+      );
+      setFilteredRestaurants(filteredList || []);
+    } else {
+      setFilteredRestaurants(listOfRestaurants);
+    }
+    setIsTopRated(!isTopRated);
+  };
+  
   return listOfRestaurants.length === 0 ? (
     <Shimmer />
   ) : (
@@ -54,22 +48,18 @@ const Body = () => {
           />
           <button onClick={handleSearch}>Search</button>
         </div>
-        <button
-          className="filter-btn"
-          onClick={() => {
-            const filteredList = listOfRestaurants.filter(
-              (res) => res?.info?.avgRating > 4
-            );
-            setFilteredRestaurant(filteredList);
-          }}
-        >
+        <button className="filter-btn" onClick={filterTopRated}>
           Top Rated Restaurants
         </button>
       </div>
       <div className="res-container">
-        {filteredRestaurant.map((restaurant) => (
-          <RestaurantCard key={restaurant?.info?.id} resData={restaurant} />
-        ))}
+        {Array.isArray(filteredRestaurants) && filteredRestaurants.length > 0 ? (
+          filteredRestaurants.map((restaurant, index) => (
+            <RestaurantCard key={restaurant.info.id || index} resData={restaurant} />
+          ))
+        ) : (
+          <p>No restaurants found</p>
+        )}
       </div>
     </div>
   );
