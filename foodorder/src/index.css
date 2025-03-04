@@ -18,7 +18,9 @@
   justify-content: space-between;
   padding: 0 20px;
   border: 1px solid black;
+  border-radius: 10px;
   align-items: center;
+  background-color: rgba(168, 242, 170, 0.792);
 }
 
 .logo {
@@ -36,8 +38,15 @@
   cursor: pointer;
   padding: 10px;
   margin: 10px;
-}
+  text-decoration: none;
+  color: black;
 
+ 
+}
+.nav-items a{
+  text-decoration: none;
+  color: black;
+}
 .search-container {
   display: flex;
   justify-content: center;
@@ -122,8 +131,22 @@
    font-weight: 700;
    margin-top: 15px;
    height: 40px;
+   border-radius: 10px;
 }
 .filter{
   display: flex;
   
+}
+.About{
+  text-align: center;
+}
+.About-Us{
+  font-weight: 600;
+  margin: 10px 10px;
+}
+.About-mini{
+  margin: 20px;
+}
+.About-mini p{
+  margin: 20px;
 }
